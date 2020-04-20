@@ -44,12 +44,38 @@ import org.xml.sax.SAXParseException;
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
+
+/**
+ * Mybatis中解析起模块中比较关键的类
+ *
+ * 这个Class中共提供了16个构造方法,
+ * 这些构造方法会调用这个Class中定义的createDocument()方法加载XML文档
+ *
+ * 还提供了一系列的eval*()方法用于查找指定路径的节点和属性并进行类型转换,
+ * 在这些eval*()方法中,需要特别注意的是evalString()方法
+ * evalString()方法还实现了对动态SQL中占位符的支持
+ */
 public class XPathParser {
 
+  /**
+   * Document对象
+   */
   private final Document document;
+  /**
+   * 是否验证
+   */
   private boolean validation;
+  /**
+   * 用于加载本地的DTD文档
+   */
   private EntityResolver entityResolver;
+  /**
+   * Properties属性集合
+   */
   private Properties variables;
+  /**
+   * Xpath对象
+   */
   private XPath xpath;
 
   public XPathParser(String xml) {
