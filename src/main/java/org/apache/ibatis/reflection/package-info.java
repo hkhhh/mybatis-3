@@ -15,5 +15,7 @@
  */
 /**
  * Reflection utils.
+ * Mybatis的反射工具箱
+ * 对Java反射功能做了进一步的封装
  */
 package org.apache.ibatis.reflection;

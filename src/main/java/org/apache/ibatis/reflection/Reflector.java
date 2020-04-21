@@ -47,24 +47,48 @@ import org.apache.ibatis.reflection.property.PropertyNamer;
  *
  * @author Clinton Begin
  */
+
+/**
+ * MyBatis中反射模块的基础
+ * 缓存了反射操作需要的类的元信息
+ */
 public class Reflector {
 
+  // 对应的Class的type
   private final Class<?> type;
+  // 对应的Class的getter方法的属性的属性名数组
   private final String[] readablePropertyNames;
+  // 对应的Class的setter方法的属性的属性名数组
   private final String[] writablePropertyNames;
+  // 对应的Class的set方法集合
   private final Map<String, Invoker> setMethods = new HashMap<>();
+  // 对应的Class的get方法集合
   private final Map<String, Invoker> getMethods = new HashMap<>();
+  // 对应的Class的set方法返回值
   private final Map<String, Class<?>> setTypes = new HashMap<>();
+  // 对应的Class的get方法返回值
   private final Map<String, Class<?>> getTypes = new HashMap<>();
+  // 对应的Class的默认构造方法
   private Constructor<?> defaultConstructor;
 
   private Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
+  /**
+   * Reflector的构造函数
+   * Reflector会在构造函数中填充传入的Class的元信息
+   * @param clazz 对应的Class
+   */
   public Reflector(Class<?> clazz) {
     type = clazz;
     addDefaultConstructor(clazz);
+    // 处理clazz中的get方法
+    // 将clazz中的get方法与返回值分别填充值getMethods与getTypes集合中
     addGetMethods(clazz);
+    // 处理clazz中的set方法
+    // 处理过程与处理get方法的流程大致一致 只是在解决方法冲突时有一些差别
     addSetMethods(clazz);
+    // 处理没有getter与setter的属性
+    // 将它们同样也存进getMethods、getTypes/setMethods、setTypes元数据中
     addFields(clazz);
     readablePropertyNames = getMethods.keySet().toArray(new String[0]);
     writablePropertyNames = setMethods.keySet().toArray(new String[0]);
@@ -84,12 +108,26 @@ public class Reflector {
 
   private void addGetMethods(Class<?> clazz) {
     Map<String, List<Method>> conflictingGetters = new HashMap<>();
+    // 获取类中所有的方法
     Method[] methods = getClassMethods(clazz);
+    // 筛选出符合JavaBean规范的getter方法并put到conflictingGetters集合中
     Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0 && PropertyNamer.isGetter(m.getName()))
       .forEach(m -> addMethodConflict(conflictingGetters, PropertyNamer.methodToProperty(m.getName()), m));
+    // 对方法的覆盖进行处理,将getter方法记录至Reflector.getMethods中,将getter返回值的类型记录至Reflector.getTypes中
     resolveGetterConflicts(conflictingGetters);
   }
 
+  /**
+   * 对getter方法冲突进行处理并调用Reflector.addGetMethod()
+   * 其实这里的conflictingGetters值得是方法的签名不一致但是方法名一致这种情况
+   * 这种情况会出现在子类覆盖父类方法时
+   * 例如 父类:List<Student> getStudents() 与 子类:ArrayList<Student> getStudents() 这两个方法
+   * 他们的方法签名不同，但是方法名相同
+   * 因此需要对这种情况进行处理
+   *
+   * 需要注意的是 入参 conflictingGetters 的key为这个getter方法对应的属性名
+   * 因此在上述这种情况下，这个conflictingGetters的内容为 { "student": [Method(getStudents), Method(getStudents)]  }
+   */
   private void resolveGetterConflicts(Map<String, List<Method>> conflictingGetters) {
     for (Entry<String, List<Method>> entry : conflictingGetters.entrySet()) {
       Method winner = null;
@@ -123,6 +161,7 @@ public class Reflector {
   }
 
   private void addGetMethod(String name, Method method, boolean isAmbiguous) {
+    // 根据传入的Method构建一个MethodInvoker对象
     MethodInvoker invoker = isAmbiguous
         ? new AmbiguousMethodInvoker(method, MessageFormat.format(
             "Illegal overloaded getter method with ambiguous type for property ''{0}'' in class ''{1}''. This breaks the JavaBeans specification and can cause unpredictable results.",
@@ -269,13 +308,18 @@ public class Reflector {
    * We use this method, instead of the simpler <code>Class.getMethods()</code>,
    * because we want to look for private methods as well.
    *
+   * 获取当前类以及当前类的父类中定义的所有方法
+   *
    * @param clazz The class
    * @return An array containing all methods in this class
    */
   private Method[] getClassMethods(Class<?> clazz) {
     Map<String, Method> uniqueMethods = new HashMap<>();
     Class<?> currentClass = clazz;
+    // 查询currentClass的所有方法并一一生成方法签名 放进uniqueMethods集合中
     while (currentClass != null && currentClass != Object.class) {
+      // 这里在查询currentClass的方法是用到了Class.getDeclaredMethods()获取类自身声明的所有方法，
+      // 包括public, protected, default (package) access, and private
       addUniqueMethods(uniqueMethods, currentClass.getDeclaredMethods());
 
       // we also need to look for interface methods -
@@ -290,12 +334,15 @@ public class Reflector {
 
     Collection<Method> methods = uniqueMethods.values();
 
+    // 返回Method数组
     return methods.toArray(new Method[0]);
   }
 
   private void addUniqueMethods(Map<String, Method> uniqueMethods, Method[] methods) {
     for (Method currentMethod : methods) {
-      if (!currentMethod.isBridge()) {
+      if (!currentMethod.isBridge()) { // 检查是否为桥接方法
+        // 为currentMethod计算它的签名 主要是为了保证唯一性
+        // 因为入参uniqueMethods的value是一个Method类型
         String signature = getSignature(currentMethod);
         // check to see if the method is already known
         // if it is known, then an extended class must have
@@ -307,6 +354,13 @@ public class Reflector {
     }
   }
 
+  /**
+   * 为一个method生成签名
+   * 签名的具体格式为 返回值类型#方法名:参数类型列表
+   * 这个method的签名在全局都是唯一的，可以作为这个method的唯一标识
+   * @param method
+   * @return
+   */
   private String getSignature(Method method) {
     StringBuilder sb = new StringBuilder();
     Class<?> returnType = method.getReturnType();
