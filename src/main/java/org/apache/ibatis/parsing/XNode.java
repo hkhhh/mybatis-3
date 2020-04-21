@@ -30,6 +30,10 @@ import org.w3c.dom.NodeList;
 /**
  * @author Clinton Begin
  */
+
+/**
+ * 对org.w3c.dom.Node做了一系列对封装
+ */
 public class XNode {
 
   private final Node node;

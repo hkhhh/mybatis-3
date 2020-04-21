@@ -15,5 +15,6 @@
  */
 /**
  * Parsing utils.
+ * Mybatis 解析器模块
  */
 package org.apache.ibatis.parsing;

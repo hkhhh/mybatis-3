@@ -18,10 +18,17 @@ package org.apache.ibatis.parsing;
 /**
  * @author Clinton Begin
  */
+
+/**
+ * 通配符解析器
+ */
 public class GenericTokenParser {
 
+  // 通配符开始标记
   private final String openToken;
+  // 通配符结束标记
   private final String closeToken;
+  // 通配符处理Handler
   private final TokenHandler handler;
 
   public GenericTokenParser(String openToken, String closeToken, TokenHandler handler) {
@@ -74,6 +81,7 @@ public class GenericTokenParser {
           builder.append(src, start, src.length - start);
           offset = src.length;
         } else {
+          // 去除通配符内的内容后 调用TokenHandler的handleToken方法实现例如变量替换等功能
           builder.append(handler.handleToken(expression.toString()));
           offset = end + closeToken.length();
         }

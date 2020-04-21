@@ -21,6 +21,10 @@ import java.util.Properties;
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
+
+/**
+ * 属性解析器
+ */
 public class PropertyParser {
 
   private static final String KEY_PREFIX = "org.apache.ibatis.parsing.PropertyParser.";
@@ -56,6 +60,10 @@ public class PropertyParser {
     return parser.parse(string);
   }
 
+  /**
+   * 私有静态内部类
+   * 用于变量解析
+   */
   private static class VariableTokenHandler implements TokenHandler {
     private final Properties variables;
     private final boolean enableDefaultValue;
@@ -71,11 +79,16 @@ public class PropertyParser {
       return (variables == null) ? defaultValue : variables.getProperty(key, defaultValue);
     }
 
+    /**
+     * 变量解析的具体实现
+     * @param content
+     * @return
+     */
     @Override
     public String handleToken(String content) {
       if (variables != null) {
         String key = content;
-        if (enableDefaultValue) {
+        if (enableDefaultValue) { // 查看是否支持默认值
           final int separatorIndex = content.indexOf(defaultValueSeparator);
           String defaultValue = null;
           if (separatorIndex >= 0) {
@@ -83,9 +96,11 @@ public class PropertyParser {
             defaultValue = content.substring(separatorIndex + defaultValueSeparator.length());
           }
           if (defaultValue != null) {
+            // 返回默认值或者variables中的key对应的值
             return variables.getProperty(key, defaultValue);
           }
         }
+        // 如果不支持默认值 则直接查看variables中是否有这个key并返回对应的值
         if (variables.containsKey(key)) {
           return variables.getProperty(key);
         }
