@@ -85,7 +85,7 @@ public class Reflector {
     // 将clazz中的get方法与返回值分别填充值getMethods与getTypes集合中
     addGetMethods(clazz);
     // 处理clazz中的set方法
-    // 处理过程与处理get方法的流程大致一致 只是在解决方法冲突时有一些差别
+    // 处理过程与处理get方法的流程大致一致 只是在解决方法冲突(resolveSetterConflicts)时有一些差别
     addSetMethods(clazz);
     // 处理没有getter与setter的属性
     // 将它们同样也存进getMethods、getTypes/setMethods、setTypes元数据中
