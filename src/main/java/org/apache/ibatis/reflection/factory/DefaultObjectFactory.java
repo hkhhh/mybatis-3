@@ -34,6 +34,8 @@ import org.apache.ibatis.reflection.ReflectionException;
 import org.apache.ibatis.reflection.Reflector;
 
 /**
+ * ObjectFactory的唯一实现
+ *
  * @author Clinton Begin
  */
 public class DefaultObjectFactory implements ObjectFactory, Serializable {
@@ -53,9 +55,18 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
     return (T) instantiateClass(classToCreate, constructorArgTypes, constructorArgs);
   }
 
+  /**
+   * 根据传入的参数列表选择合适的构造函数实例化对象
+   * @param type 需要实例化的类
+   * @param constructorArgTypes 构造函数参数type列表
+   * @param constructorArgs 构造函数参数value列表
+   * @param <T>
+   * @return
+   */
   private  <T> T instantiateClass(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
     try {
       Constructor<T> constructor;
+      // 通过无参构造函数创建对象
       if (constructorArgTypes == null || constructorArgs == null) {
         constructor = type.getDeclaredConstructor();
         try {
@@ -69,8 +80,10 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
           }
         }
       }
+      // 根据指定的参数列表查找构造函数
       constructor = type.getDeclaredConstructor(constructorArgTypes.toArray(new Class[0]));
       try {
+        // 实例化对象
         return constructor.newInstance(constructorArgs.toArray(new Object[0]));
       } catch (IllegalAccessException e) {
         if (Reflector.canControlMemberAccessible()) {
