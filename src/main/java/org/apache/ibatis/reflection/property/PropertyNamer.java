@@ -20,6 +20,8 @@ import java.util.Locale;
 import org.apache.ibatis.reflection.ReflectionException;
 
 /**
+ * 提供了一些静态方法以完成将方法名转换成属性名以及一系列的检测
+ *
  * @author Clinton Begin
  */
 public final class PropertyNamer {

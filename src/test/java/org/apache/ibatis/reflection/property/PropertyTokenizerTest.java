@@ -1,6 +1,5 @@
 package org.apache.ibatis.reflection.property;
 
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

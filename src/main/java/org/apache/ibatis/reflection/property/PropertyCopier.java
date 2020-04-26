@@ -20,6 +20,9 @@ import java.lang.reflect.Field;
 import org.apache.ibatis.reflection.Reflector;
 
 /**
+ * 相同类型的两个对象之间属性拷贝
+ * 包括父类中定义的字段的属性值
+ *
  * @author Clinton Begin
  */
 public final class PropertyCopier {
