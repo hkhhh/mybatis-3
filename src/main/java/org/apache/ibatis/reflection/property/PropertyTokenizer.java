@@ -21,9 +21,13 @@ import java.util.Iterator;
  * @author Clinton Begin
  */
 public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
+  // 属性名
   private String name;
+  // 带下标带属性名 如果没有下标 则为属性名
   private final String indexedName;
+  // 下标的值
   private String index;
+  // 子表达式
   private final String children;
 
   public PropertyTokenizer(String fullname) {
