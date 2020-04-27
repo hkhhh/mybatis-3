@@ -34,6 +34,7 @@ public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
     int delim = fullname.indexOf('.');
     if (delim > -1) {
       name = fullname.substring(0, delim);
+      // 需要注意的是 children只与'.'有关 如果表达式内有'.'则表示有children表达式 与下标无关
       children = fullname.substring(delim + 1);
     } else {
       name = fullname;
