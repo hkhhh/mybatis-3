@@ -15,13 +15,15 @@
  */
 package org.apache.ibatis.reflection.wrapper;
 
-import java.util.List;
-
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
+import java.util.List;
+
 /**
+ * 对对象级别的元信息的处理
+ *
  * @author Clinton Begin
  */
 public interface ObjectWrapper {
