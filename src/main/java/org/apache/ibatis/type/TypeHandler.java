@@ -21,6 +21,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
+ * MyBatis中所有的类型转换器都实现了TypeHandler接口
+ *
+ * 为了用户方便自定义TypeHandler的实现，MyBatis提供了{@link BaseTypeHandler}这个抽象类
+ *
+ * 一般情况下，TypeHandler用于完成单个参数以及单个列值的类型转换,
+ * 如果存在多列值转换成一个JavaBean对象时，优先考虑使用ResultMap
+ *
  * @author Clinton Begin
  */
 public interface TypeHandler<T> {
@@ -33,7 +40,7 @@ public interface TypeHandler<T> {
    * @param rs
    *          the rs
    * @param columnName
-   *          Colunm name, when configuration <code>useColumnLabel</code> is <code>false</code>
+   *          Column name, when configuration <code>useColumnLabel</code> is <code>false</code>
    * @return the result
    * @throws SQLException
    *           the SQL exception
