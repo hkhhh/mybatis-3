@@ -51,14 +51,17 @@ public final class PreparedStatementLogger extends BaseJdbcLogger implements Inv
         if (isDebugEnabled()) {
           debug("Parameters: " + getParameterValueString(), true);
         }
+        // 清空BaseJdbcLogger中定义的三个column*集合
         clearColumnInfo();
         if ("executeQuery".equals(method.getName())) {
+          // 为ResultSet创建代理对象
           ResultSet rs = (ResultSet) method.invoke(statement, params);
           return rs == null ? null : ResultSetLogger.newInstance(rs, statementLog, queryStack);
         } else {
           return method.invoke(statement, params);
         }
       } else if (SET_METHODS.contains(method.getName())) {
+        // 如果是SET_METHODS集合中的方法，则通过setColumn()方法记录到BaseJdbcLogger的column*集合中
         if ("setNull".equals(method.getName())) {
           setColumn(params[0], null);
         } else {

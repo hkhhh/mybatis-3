@@ -39,7 +39,9 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 public final class ResultSetLogger extends BaseJdbcLogger implements InvocationHandler {
 
   private static final Set<Integer> BLOB_TYPES = new HashSet<>();
+  // 是否为ResultSet结果集的第一行
   private boolean first = true;
+  // 行数
   private int rows;
   private final ResultSet rs;
   private final Set<Integer> blobColumns = new HashSet<>();
@@ -74,6 +76,7 @@ public final class ResultSetLogger extends BaseJdbcLogger implements InvocationH
             ResultSetMetaData rsmd = rs.getMetaData();
             final int columnCount = rsmd.getColumnCount();
             if (first) {
+              // 如果是第一行数据 则输出表头
               first = false;
               printColumnHeaders(rsmd, columnCount);
             }
