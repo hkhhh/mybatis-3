@@ -30,6 +30,9 @@ import org.apache.ibatis.logging.LogFactory;
 /**
  * Provides a very simple API for accessing resources within an application server.
  *
+ * VFS(Virtual File System)虚拟文件系统
+ * 用于查找指定路径下的资源
+ *
  * @author Ben Gunter
  */
 public abstract class VFS {
@@ -50,11 +53,13 @@ public abstract class VFS {
     @SuppressWarnings("unchecked")
     static VFS createVFS() {
       // Try the user implementations first, then the built-ins
+      // 优先使用用户自定义的VFS实现,如果没有自定义的VFS实现,则使用MyBatis提供的VFS实现
       List<Class<? extends VFS>> impls = new ArrayList<>();
       impls.addAll(USER_IMPLEMENTATIONS);
       impls.addAll(Arrays.asList((Class<? extends VFS>[]) IMPLEMENTATIONS));
 
       // Try each implementation class until a valid one is found
+      // 遍历impls,依此实例化VFS对象并检测是否有效,一旦得到有效的VFS对象,则循环结束
       VFS vfs = null;
       for (int i = 0; vfs == null || !vfs.isValid(); i++) {
         Class<? extends VFS> impl = impls.get(i);

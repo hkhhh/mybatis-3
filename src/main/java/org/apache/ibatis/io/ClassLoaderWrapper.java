@@ -21,15 +21,21 @@ import java.net.URL;
 /**
  * A class to wrap access to multiple class loaders making them work as one
  *
+ * ClassLoader包装器,包含了多个ClassLoader对象
+ * 通过多个类加载器的使用顺序,ClassLoaderWrapper可以确保返回给系统的是正确的ClassLoader
+ *
  * @author Clinton Begin
  */
 public class ClassLoaderWrapper {
 
+  // 应用指定的默认加载器
   ClassLoader defaultClassLoader;
+  // System ClassLoader
   ClassLoader systemClassLoader;
 
   ClassLoaderWrapper() {
     try {
+      // 初始化systemClassLoader
       systemClassLoader = ClassLoader.getSystemClassLoader();
     } catch (SecurityException ignored) {
       // AccessControlException on Google App Engine
@@ -177,7 +183,7 @@ public class ClassLoaderWrapper {
    */
   Class<?> classForName(String name, ClassLoader[] classLoader) throws ClassNotFoundException {
 
-    for (ClassLoader cl : classLoader) {
+    for (ClassLoader cl : classLoader) { // 遍历ClassLoader数组
 
       if (null != cl) {
 
@@ -201,13 +207,17 @@ public class ClassLoaderWrapper {
 
   }
 
+  /**
+   * 返回一个ClassLoader数组,
+   * 该数组指明了类加载器的使用顺序
+   */
   ClassLoader[] getClassLoaders(ClassLoader classLoader) {
     return new ClassLoader[]{
-        classLoader,
-        defaultClassLoader,
-        Thread.currentThread().getContextClassLoader(),
-        getClass().getClassLoader(),
-        systemClassLoader};
+        classLoader, // 参数指定的类加载器
+        defaultClassLoader, // 系统指定的类加载器
+        Thread.currentThread().getContextClassLoader(), // 当前线程绑定的类加载器
+        getClass().getClassLoader(), // 加载当前类所使用的类加载器
+        systemClassLoader}; // System ClassLoader
   }
 
 }

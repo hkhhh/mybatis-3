@@ -58,6 +58,13 @@ import org.apache.ibatis.logging.LogFactory;
  * @param <T>
  *          the generic type
  */
+
+/**
+ * 可以根据指定的条件查找指定包下的类
+ * 其中使用的条件由Test接口表示, 分别是IsA和AnnotatedWith
+ * IsA用于检测类是否继承了指定的类或接口
+ * AnnotatedWith用于检测是否添加了指定的注解
+ */
 public class ResolverUtil<T> {
 
   /**
