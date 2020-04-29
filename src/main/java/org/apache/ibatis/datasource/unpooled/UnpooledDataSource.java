@@ -52,6 +52,7 @@ public class UnpooledDataSource implements DataSource {
   private Integer defaultNetworkTimeout;
 
   static {
+    // 将已在DriverManager中注册的JDBC Driver复制一份到UnpooledDataSource.registeredDrivers中
     Enumeration<Driver> drivers = DriverManager.getDrivers();
     while (drivers.hasMoreElements()) {
       Driver driver = drivers.nextElement();
@@ -220,14 +221,16 @@ public class UnpooledDataSource implements DataSource {
   }
 
   private Connection doGetConnection(Properties properties) throws SQLException {
-    initializeDriver();
+    initializeDriver();// 初始化数据库驱动
+    // 创建真正的数据库连接
     Connection connection = DriverManager.getConnection(url, properties);
+    // 配置数据库连接的autoCommit和隔离级别
     configureConnection(connection);
     return connection;
   }
 
   private synchronized void initializeDriver() throws SQLException {
-    if (!registeredDrivers.containsKey(driver)) {
+    if (!registeredDrivers.containsKey(driver)) { // 检测驱动是否已经注册
       Class<?> driverType;
       try {
         if (driverClassLoader != null) {
@@ -237,9 +240,9 @@ public class UnpooledDataSource implements DataSource {
         }
         // DriverManager requires the driver to be loaded via the system ClassLoader.
         // http://www.kfu.com/~nsayer/Java/dyn-jdbc.html
-        Driver driverInstance = (Driver) driverType.getDeclaredConstructor().newInstance();
-        DriverManager.registerDriver(new DriverProxy(driverInstance));
-        registeredDrivers.put(driver, driverInstance);
+        Driver driverInstance = (Driver) driverType.getDeclaredConstructor().newInstance();// 创建Driver对象
+        DriverManager.registerDriver(new DriverProxy(driverInstance)); // 注册驱动
+        registeredDrivers.put(driver, driverInstance); // 将驱动添加到registeredDrivers集合中
       } catch (Exception e) {
         throw new SQLException("Error setting driver on UnpooledDataSource. Cause: " + e);
       }

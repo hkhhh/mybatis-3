@@ -18,11 +18,16 @@ package org.apache.ibatis.datasource.pooled;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSourceFactory;
 
 /**
+ * PooledDataSourceFactory继承了UnpooledDataSourceFactory
+ * 但是没有覆盖setProperties方法和getDataSource()方法
+ *
  * @author Clinton Begin
  */
 public class PooledDataSourceFactory extends UnpooledDataSourceFactory {
 
   public PooledDataSourceFactory() {
+    // 与UnpooledDataSourceFactory不同的是
+    // PooledDataSourceFactory在初始化时会将dataSource初始化为PooledDataSource对象
     this.dataSource = new PooledDataSource();
   }
 
