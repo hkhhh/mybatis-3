@@ -32,6 +32,12 @@ import org.apache.ibatis.transaction.TransactionException;
  * Delays connection retrieval until getConnection() is called.
  * Ignores commit or rollback requests when autocommit is on.
  *
+ * JDBCTransaction依赖于JDBC Connection控制事务的回滚和提交
+ *
+ * 在JDBCTransaction的构造函数中会初始化出了connection字段以外的其他三个字段
+ * connection字段会延迟初始化,这个过程会在调用getConnection()方法时触发
+ * 在初始化connection字段时,还会同时设置autoCommit字段与事务隔离级别(level字段)
+ *
  * @author Clinton Begin
  *
  * @see JdbcTransactionFactory

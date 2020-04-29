@@ -22,12 +22,15 @@ import java.sql.SQLException;
  * Wraps a database connection.
  * Handles the connection lifecycle that comprises: its creation, preparation, commit/rollback and close.
  *
+ * MyBatis使用Transaction对数据库事务进行了抽象
+ *
  * @author Clinton Begin
  */
 public interface Transaction {
 
   /**
    * Retrieve inner database connection.
+   * 获取Transaction对应的数据库连接
    * @return DataBase connection
    * @throws SQLException
    *           the SQL exception
@@ -36,6 +39,7 @@ public interface Transaction {
 
   /**
    * Commit inner database connection.
+   * 提交事务
    * @throws SQLException
    *           the SQL exception
    */
@@ -43,6 +47,7 @@ public interface Transaction {
 
   /**
    * Rollback inner database connection.
+   * 回滚
    * @throws SQLException
    *           the SQL exception
    */
@@ -50,6 +55,7 @@ public interface Transaction {
 
   /**
    * Close inner database connection.
+   * 关闭数据库连接
    * @throws SQLException
    *           the SQL exception
    */
@@ -57,6 +63,7 @@ public interface Transaction {
 
   /**
    * Get transaction timeout if set.
+   * 事务超时时间
    *
    * @return the timeout
    * @throws SQLException
