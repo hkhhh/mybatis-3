@@ -27,26 +27,35 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 
 /**
+ * Mapper接口及其对应的代理对象工厂的注册中心
+ *
  * @author Clinton Begin
  * @author Eduardo Macarron
  * @author Lasse Voss
  */
 public class MapperRegistry {
 
+  // MyBatis全局唯一的配置对象,其中包含了所有的配置信息
   private final Configuration config;
+  // 记录了Mapper接口与MapperProxyFactory之间的关系
   private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new HashMap<>();
 
   public MapperRegistry(Configuration config) {
     this.config = config;
   }
 
+  /**
+   * 在执行某句Sql时,会先调用此方法获取实现了Mapper接口的代理对象
+   */
   @SuppressWarnings("unchecked")
   public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
+    // 查找追定的MapperProxyFactory对象
     final MapperProxyFactory<T> mapperProxyFactory = (MapperProxyFactory<T>) knownMappers.get(type);
     if (mapperProxyFactory == null) {
       throw new BindingException("Type " + type + " is not known to the MapperRegistry.");
     }
     try {
+      // 创建并返回实现了方法入参的type接口的代理对象
       return mapperProxyFactory.newInstance(sqlSession);
     } catch (Exception e) {
       throw new BindingException("Error getting mapper instance. Cause: " + e, e);
@@ -57,13 +66,18 @@ public class MapperRegistry {
     return knownMappers.containsKey(type);
   }
 
+  /**
+   * 在MyBatis初始化过程中会读取映射配置文件以及Mapper接口中的注解信息
+   * 然后调用此方法进行填充
+   */
   public <T> void addMapper(Class<T> type) {
-    if (type.isInterface()) {
-      if (hasMapper(type)) {
+    if (type.isInterface()) { // 检查是否为interface
+      if (hasMapper(type)) { // 检查是否已经加载过该接口
         throw new BindingException("Type " + type + " is already known to the MapperRegistry.");
       }
       boolean loadCompleted = false;
       try {
+        // 将Mapper接口对应的Class对象和MapperProxyFactory对象添加到knownMappers集合中
         knownMappers.put(type, new MapperProxyFactory<>(type));
         // It's important that the type is added before the parser is run
         // otherwise the binding may automatically be attempted by the
